@@ -1,0 +1,15 @@
+#ifdef F90TESTWRAPPERS
+/* BOOST_WARN_(ASSERT) */
+#define LEVEL WARN
+#include HEADERLEVELWHAT
+#undef LEVEL
+/* BOOST_CHECK_(ASSERT) */
+#define LEVEL CHECK
+#include HEADERLEVELWHAT
+#undef LEVEL
+/* BOOST_REQUIRE_(ASSERT) */
+#define LEVEL REQUIRE
+#include HEADERLEVELWHAT
+#undef LEVEL
+
+#endif
