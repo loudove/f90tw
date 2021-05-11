@@ -1,6 +1,6 @@
 f90tw
 =====
-f90tw project provides fortran wrappers for a limitted subset of the [boost](https://www.boost.org/) and [google](https://github.com/google/googletest) test frameworks functionality.
+f90tw project provides fortran wrappers for a limitted subset of the [boost](https://www.boost.org/) and [google](https://github.com/google/googletest) test frameworks functionality. At the same time, offers a rather simple mechanism for setting up and managing test suites in fortran projects. All the way down, f90tw is a preprocessor-based approach.
 
 Build
 -----
