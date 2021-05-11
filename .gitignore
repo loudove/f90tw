@@ -38,7 +38,7 @@
 *.pdb
 
 # Distribution / building
-build/
+build*/
 
 # IDE
 .vscode/

@@ -1,7 +1,27 @@
 #include "f90tw_test.h"
 
+/* expanded in fortran, places the "header" of the 
+// module contains the tests. essentially, defines
+// the "test_example" module and declare the use of
+// the "example" module (the module to be tested).
+// expanded in c/c++ makes nothing. */
 TESTMODULE(test_example, example)
 
+/* place a test and it fortran implementation. 
+//
+// expanded in fortran, results in module procedure 
+// (subroutine) add_test_method with the appropriate
+// binding info and the implementation given from the
+// 5th argument and forth. ";" should be used to declare
+// the end of asource line. you can find more details on
+// this at f90tw project page @github. 
+//
+// expanded in c/c++, results the appropriate definition
+// of the fortran subroutine making it assessible from 
+// c++ and the implemenation of the "test_example1" 
+// test in the "test_gtest" testsuite (based on the the
+// TEST macro) which essentially calls the "add_test_method"
+// fortran routine. */
 TESTCODE(TEST, test_gtest, test_example1, add_test_method,
     use ISO_C_BINDING, only : C_CHAR, C_NULL_CHAR ;
     character(KIND=C_CHAR,LEN=*), parameter :: message = "delta=0.000001 !" F90CONCAT C_NULL_CHAR ;
@@ -10,4 +30,6 @@ TESTCODE(TEST, test_gtest, test_example1, add_test_method,
     call F90_ASSERT_FLOAT_EQ( 1.0, 1.0+0.000001, message ) ;
 )
 
+/* the end statement of the "test_example" module.
+// expanded in c/c++ makes nothing. */
 ENDTESTMODULE(test_example)

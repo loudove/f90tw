@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 2.8.12)
-
-project( f90tw LANGUAGES CXX Fortran )
+# cmake_minimum_required(VERSION 2.8.12)
+# project( f90tw LANGUAGES CXX Fortran )
 
 # preprocess a fortran source file.
 # INFILE, OUTFILE : the input and the output files
@@ -31,10 +30,10 @@ function( FORTRANFPP INFILE OUTFILE )
         list ( APPEND DEFS ${def} )
     endforeach()
 
+    set( FPPOPTS "${FPP_OPTIONS}" )
+    set( FPPDEFS "${DEFS}" )
+    set( FPPINCL "${INCL}" )
     if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-        string( REPLACE ";" " " FPPOPTS "${FPP_OPTIONS}" )
-        string( REPLACE ";" " " FPPDEFS "${DEFS}" )
-        string( REPLACE ";" " " FPPINCL "${INCL}" )      
         find_program ( POWERSHELL_EXE NAMES "powershell.exe" REQUIRED)
         add_custom_command(
             OUTPUT ${OUTFILE}
@@ -43,9 +42,6 @@ function( FORTRANFPP INFILE OUTFILE )
             COMMENT "precompile ${INFILE}"
         )
     else()
-        set( FPPOPTS "${FPP_OPTIONS}" )
-        set( FPPDEFS "${DEFS}" )
-        set( FPPINCL "${INCL}" )      
         find_program ( SED_EXE NAMES "sed" REQUIRED)
         find_program ( TR_EXE NAMES "tr" REQUIRED)
         add_custom_command(
@@ -84,15 +80,15 @@ endif()
 if (NOT FPP_EXE)
     message (FATAL_ERROR "C preprocessor was not found")
 elseif ( FPP_EXE MATCHES "clang*" )
-    set( FPP_ID "LLVM" )
+    set( FPP_ID LLVM )
     set( FPP_OPTIONS -cc1 -E )
     set( FPP_SWITCH - )
 elseif( FPP_EXE MATCHES "cpp*" )
-    set( FPP_ID "GNU" )
+    set( FPP_ID GNU )
     set( FPP_OPTIONS -E )
     set( FPP_SWITCH - )
 else()
-    set( FPP_ID "MSVC" )
+    set( FPP_ID MSVC )
     set( FPP_OPTIONS /E )
     set( FPP_SWITCH / )
 endif()
@@ -104,50 +100,63 @@ set( FPP_SWITCH ${FPP_SWITCH} PARENT_SCOPE)
 
 message( STATUS "Found cpp: ${FPP_EXE} of ${FPP_ID} flavor" )
 
-add_library( f90tw_boost STATIC boost_assertions.cpp )
-set_property ( TARGET f90tw_boost PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_include_directories( f90tw_boost PUBLIC ${Boost_INCLUDE_DIRS} )
-target_link_libraries( f90tw_boost ${Boost_LIBRARIES} )
+if ( USEBOOST )
+    # on windows the save vs project can't handle both c++ and f90 files
+    # this is why to different libraries are created. moreover the f90twi
+    # should be OBJECT library since only the module file are needed for
+    # using the f90tw functionality. Nevertheless, this is not the case
+    # due to a bug, possibly in ifort compiler, is will leads to buil
+    # failure during the first attemp.
 
-add_library( f90tw_gtest STATIC gtest_assertions.cpp )
-set_property ( TARGET f90tw_gtest PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries( f90tw_gtest gtest_main )
-target_compile_definitions( f90tw_gtest PUBLIC USEGTEST)
+    add_library( f90tw_boost STATIC boost_assertions.cpp )
+    set_property ( TARGET f90tw_boost PROPERTY POSITION_INDEPENDENT_CODE ON)
+    target_include_directories( f90tw_boost PUBLIC ${Boost_INCLUDE_DIRS} )
+    target_link_libraries( f90tw_boost ${Boost_LIBRARIES} )
 
-# on windows the save vs project can't handle both c++ and f90 files
-# this is why to different libraries are created. moreover the f90twi
-# should be OBJECT library since only the module file are needed for
-# using the f90tw functionality. Nevertheless, this is not the case
-# due to a bug, possibly in ifort compiler, is will leads to buil
-# failure during the first attemp. 
-add_library( f90twi STATIC 
-    "${CMAKE_CURRENT_BINARY_DIR}/assertions_boost.f90" 
-    "${CMAKE_CURRENT_BINARY_DIR}/assertions_gtest.f90" )
-set_property ( TARGET f90twi PROPERTY POSITION_INDEPENDENT_CODE ON )
-set_property(
-        TARGET f90twi
-        APPEND
-        PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/assertions_boost.f90 ${CMAKE_CURRENT_BINARY_DIR}/assertions_gtest.f90
-)
+    set ( file1fpp "${CMAKE_CURRENT_SOURCE_DIR}/assertions_boost.fpp" )
+    set ( file1 "${CMAKE_CURRENT_BINARY_DIR}/assertions_boost.f90" )
+    add_library( f90twi_boost OBJECT "${file1}"  )
+    set_property( TARGET f90twi_boost
+        APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${file1}"
+    )
 
-# split the 
-# use RUNTIME_OUTPUT_DIRECTORY insead of CMAKE_CURRENT_BINARY_DIR
-FORTRANFPP( 
-    ${CMAKE_CURRENT_SOURCE_DIR}/assertions_boost.fpp
-    ${CMAKE_CURRENT_BINARY_DIR}/assertions_boost.f90
-    EXE ${FPP_EXE}
-    OPTIONS ${FPP_OPTIONS}
-    SWITCH ${FPP_SWITCH} 
-)
+    FORTRANFPP( "${file1fpp}" "${file1}"
+        EXE ${FPP_EXE}
+        OPTIONS ${FPP_OPTIONS}
+        SWITCH ${FPP_SWITCH}
+    )
 
-FORTRANFPP ( 
-    ${CMAKE_CURRENT_SOURCE_DIR}/assertions_gtest.fpp
-    ${CMAKE_CURRENT_BINARY_DIR}/assertions_gtest.f90
-    EXE ${FPP_EXE}
-    OPTIONS ${FPP_OPTIONS}
-    SWITCH ${FPP_SWITCH}
-    DEFINITIONS USEGTEST
-)
+endif()
+
+if ( USEGTEST )
+
+    add_library( f90tw_gtest STATIC gtest_assertions.cpp )
+    set_property ( TARGET f90tw_gtest PROPERTY POSITION_INDEPENDENT_CODE ON)
+    target_link_libraries( f90tw_gtest gtest_main )
+    target_compile_definitions( f90tw_gtest PUBLIC USEGTEST)
+
+
+    set ( file2fpp "${CMAKE_CURRENT_SOURCE_DIR}/assertions_gtest.fpp" )
+    set ( file2 "${CMAKE_CURRENT_BINARY_DIR}/assertions_gtest.f90" )
+    add_library( f90twi_gtest OBJECT "${file2}" )
+    set_property( TARGET f90twi_gtest
+            APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${file2}"
+    )
+
+    FORTRANFPP ( "${file2fpp}" "${file2}"
+        EXE ${FPP_EXE}
+        OPTIONS ${FPP_OPTIONS}
+        SWITCH ${FPP_SWITCH}
+        DEFINITIONS USEGTEST
+    )
+
+endif()
+
+
+
+
+
+
 
 # make available the include and modulee paths
 set ( f90tw_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )
