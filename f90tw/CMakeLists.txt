@@ -32,7 +32,7 @@ function( FORTRANFPP INFILE OUTFILE )
     endforeach()
 
     if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-        string( REPLACE ";" " " FPPOPTS "${OPTS}" )
+        string( REPLACE ";" " " FPPOPTS "${FPP_OPTIONS}" )
         string( REPLACE ";" " " FPPDEFS "${DEFS}" )
         string( REPLACE ";" " " FPPINCL "${INCL}" )      
         find_program ( POWERSHELL_EXE NAMES "powershell.exe" REQUIRED)
@@ -43,7 +43,7 @@ function( FORTRANFPP INFILE OUTFILE )
             COMMENT "precompile ${INFILE}"
         )
     else()
-        set( FPPOPTS "${OPTS}" )
+        set( FPPOPTS "${FPP_OPTIONS}" )
         set( FPPDEFS "${DEFS}" )
         set( FPPINCL "${INCL}" )      
         find_program ( SED_EXE NAMES "sed" REQUIRED)
@@ -60,11 +60,24 @@ endfunction()
 
 # resolve the preprocessor to be used. it is assumed that on unix bases systems
 # cpp or clang  will be found in the path and in addition, on windows based
-# systems, cl.exe may be abailable.
+# systems, cl.exe may be abailable. On mac os cpp in interface to clang with
+# "-traditional-cpp" locked. To avoid this we use directly the clang frond end.
 if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-    find_program ( FPP_EXE NAMES "cpp.exe" "clang.exe" "cl.exe" )
+    find_program ( FPP_EXE NAMES cpp.exe clang.exe cl.exe REQUIRED )
 else()
-    find_program ( FPP_EXE NAMES "cpp" "clang" )
+    find_program ( FPP_EXE NAMES clang cpp REQUIRED )
+endif()
+
+# we have prioritized clang in find_program. otherwise we
+# have to chech the cpp flavor and swtch to clang in the
+# of LLVM where the option "-traditional-cpp" is locked
+execute_process(
+    COMMAND ${FPP_EXE} --version
+    OUTPUT_VARIABLE FPPEXETMP
+)
+if ( FPPEXETMP MATCHES LLVM AND ( NOT FPP_EXE MATCHES clang ) )
+    unset( FPP_EXE CACHE)
+    find_program ( FPP_EXE NAMES clang REQUIRED)
 endif()
 
 # resolve preprocessor options
@@ -72,15 +85,15 @@ if (NOT FPP_EXE)
     message (FATAL_ERROR "C preprocessor was not found")
 elseif ( FPP_EXE MATCHES "clang*" )
     set( FPP_ID "LLVM" )
-    set( FPP_OPTIONS "-cc1" "-E" )
+    set( FPP_OPTIONS -cc1 -E )
     set( FPP_SWITCH - )
 elseif( FPP_EXE MATCHES "cpp*" )
     set( FPP_ID "GNU" )
-    set( FPP_OPTIONS "-E" )
+    set( FPP_OPTIONS -E )
     set( FPP_SWITCH - )
 else()
     set( FPP_ID "MSVC" )
-    set( FPP_OPTIONS "/E" )
+    set( FPP_OPTIONS /E )
     set( FPP_SWITCH / )
 endif()
 

@@ -4,17 +4,17 @@
 
 #include "f90tw_defs.h"
 
-// get the test defined in the corresponding file
+/* get the test defined in the corresponding file
 // and create the definitions of the fortran methods
-// to be used
+// to be used */
 #define TESTMODULE( ... ) 
 #define ENDTESTMODULE( ... )
 #define TESTCODE HCODE
 #include CURRENTTESTFILE
 
-// get the test defined in the corresponding file
+/* get the test defined in the corresponding file
 // and create implementation of the c++ methods for
-// calling the paired fortran code
+// calling the paired fortran code */
 #undef TESTCODE
 #define TESTCODE CCODE
 #include CURRENTTESTFILE

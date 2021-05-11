@@ -4,13 +4,17 @@ cmake_minimum_required(VERSION 2.8.12)
 # project name and language
 project(f90tw LANGUAGES CXX Fortran)
 
+set (f90tw_VERSION_MAJOR "0")
+set (f90tw_VERSION_MINOR "1")
+
 # cxx requirements
-set(CMAKE_CXX_STANDARD 14) 
+# set(CMAKE_CXX_STANDARD 14) 
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) 
 
 # f90 line length; TODO handle compilers other than GNU
-if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+set( CMAKE_Fortran_FORMAT FREE )
+if ( CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     set( CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS} "-ffree-line-length-none" )
 endif()
 
