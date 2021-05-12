@@ -50,7 +50,10 @@
 /* module TESTNAME closure */
 #define F90ENDTESTMODULE(TESTNAME) end module TESTNAME
 
-/* code generation macros */
+/* code generation macros, 
+// H* : c definition
+// C* : c/c++ implementation
+// F* : fortran implemenation. */
 #define HCODE_( TESTTYPE, TESTSUITENAME, TESTNAME, SUBNAME, ... ) extern "C" {  void SUBNAME(); }
 #define HCODE( TESTTYPE, TESTSUITENAME, TESTNAME, SUBNAME, ... ) HCODE_( TESTTYPE,TESTSUITENAME, TESTNAME, SUBNAME, __VA_ARGS__ )
 #define CCODE_( TESTTYPE, TESTSUITENAME, TESTNAME, SUBNAME, ... ) TESTTYPE(TESTNAME) { SUBNAME(); }

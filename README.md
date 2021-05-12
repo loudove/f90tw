@@ -10,6 +10,8 @@ Build
 -----
 You will need to obtain the repository from github and follow the usual cmake build steps. It is assumed that c/c++ and fortran compilers are available and you have installed boost and gtest packages. In short, [clone](https://github.com/git-guides/git-clone) the project from github, enter the project's directory and issue the usual [cmake](https://cmake.org/documentation/) build commands.
 
+Using the cmake options `BOOSTFWK` and `GTESTFWK` you can select the framework to be used. `BOOSTFWK` is `ON` by default. You can set them both to `ON` if you like but not to `OFF` since this will signal a cmake configuration error.
+
 There is not specific installation directory. After a successful build, the module files and the libraries will be located under the `<build>/f90tw` directory (or `<build>/f90tw/<conf>` on windows). The actual source files of the modules will be located in the `<build>/f90tw` directory with the names `assertions_boost.f90` and `assertion_gtest.f90` for the boost and gtest frameworks respectively.
 
 Use
@@ -18,9 +20,9 @@ A fortran module with the interface of the fortran wrappers and the correspondin
 - Boost: **assertions_boost** module (implementable in [`assertions_boost.fpp`](f90tw/assertions_boost.fpp)), `libf90tw_boost.a` library (implemented in [`boost_assertions.cpp`](f90tw/boost_assertions.cpp)). After a successful build a "readable" code for the module can be found in `<build>/f90tw/assertions_boost.f90`.
 - Gtest: **assertions_gtest** module (implemented in [`assertions_gtest.fpp`](f90tw/assertions_gtest.fpp)), `libf90tw_gtest.a` library (implemented in `gtest_assertions.cpp`). Also in this case, after a successful build a "readable" code for the module will be located in `<build>/f90tw/ftest_boost.f90`.
 
-If you include f90tw in your cmake project, the variables `f90tw_INCLUDE_DIR` (pointing to the heads directory) and `f90tw_MODULE_DIR` (pointing to the modules and libraries directory) are defined to help you access f90tw functionality.
+If you include f90tw in your cmake project, the variables `f90tw_INCLUDE_DIR` (pointing to the heads directory) and `f90tw_MODULE_DIR` (pointing to the modules and libraries directory) are defined to help you access f90tw functionality. You can find hinds of f90tw use with cmake in [`example/CMakeLists.txt`](example/CMakeLists.txt).
 
-To facilitate the setup of simple tests, additional header files are provided with their main usage demonstrated in the accompanying example found in the [`example`](example) directory. You can find hinds of f90tw use with cmake in [`example/CMakeLists.txt`](example/CMakeLists.txt).
+To facilitate the setup of simple tests, additional header files are provided with their main usage demonstrated in the accompanying example found in the [`example`](example) directory. A detailed walkthrough of the implementation of the examples can be found [here](example/README.md).
 
 Assuming that you want to test the functionality of a fortran module named *example*, implemented in [`example.f90`](example/example.f90). In this case, the test can be implemented with a pair of two files:
 - Boost: a fortran module, ([`test_module_example_boost.fpp`](example/test_module_example_boost.fpp)), with the subroutines implementing the actual tests and its c/c++ pair, [`test_example_boost.cpp`](example/test_example_boost.cpp), implementing the boost tests wrapping their fortran counterparts.
@@ -41,7 +43,7 @@ The structure of these files is simple and quite similar. In the fortran files, 
     **PLEASE NOTE** that each code line should be terminated with `;` while the string concatenation operator (`//`) should be replaced with the `F90CONCAT` macro and the line continuation operator (`&`) with the `F90LNCONT` macro. Moreover, `F90SPOT` macro expands to the `filename:line` string, while `F90SPOTMSG(MSG)` macro appends the MSG string to it. <u>You can simplify the implementation here by just calling a fortran method implemented elsewhere.</u> This approach is maybe preferable since you will avoid the drawbacks of preprocessing relevant to code's clarity and debugging.
 - **ENDTESTMODULE** : (*optional*) module end statement. The only argument here is the name of the module (MODULENAME) used also with the **TESTMODULE** macro.
 
-Using this approach, the c++ implementation becomes rather easy since you have to set the `CURRENTTESTFILE` definition located at the very begining of the file to point the fortran pair and just include the header corresponding to the framework in use (`f90tw_gtest.h` for *gtest* or `f90tw_boost.h` for *boost*).
+Using this approach, the c++ implementation becomes rather easy since it is based on preprocessing the same fortran file, with different definitions of the macros resulting automatically in a) the declarations of the fortran test methods and b) the framework tests which essentially wrap these methods. A more detailed description of the fortran and c/c++ files is provided [here](example/README.md).
 
 Boost.test assertions tests
 ---------------------------
