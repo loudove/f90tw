@@ -8,6 +8,7 @@ module assertions_boost
 
 #define HEADERLEVEL "boost_level.h"
 #define HEADERLEVELWHAT "interface_boost_wrappers.h"
+#define VERSIONSUB F90_F90TW_VER
 #define BOOSTFUNCTION1 F90_BOOST_LEVEL_MESSAGE
 #define BOOSTFUNCTION2 F90_BOOST_LEVEL_CHECK1T2A
 #define BOOSTFUNCTION3 F90_BOOST_LEVEL_CHECK1T3A
@@ -19,6 +20,7 @@ module assertions_boost
 #undef BOOSTFUNCTION3
 #undef BOOSTFUNCTION2
 #undef BOOSTFUNCTION1
+#undef VERSIONSUB
 #undef HEADERLEVELWHAT
 #undef HEADERLEVEL
 

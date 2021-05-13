@@ -4,9 +4,6 @@ cmake_minimum_required(VERSION 2.8.12)
 # project name and language
 project(f90tw LANGUAGES CXX Fortran)
 
-set (f90tw_VERSION_MAJOR "0")
-set (f90tw_VERSION_MINOR "1")
-
 # cxx requirements
 # set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)

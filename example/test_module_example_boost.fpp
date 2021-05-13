@@ -43,6 +43,14 @@ TESTCODE(BOOST_AUTO_TEST_CASE, DUMMY, test_example3, add_test_methodf2,
     call F90_BOOST_REQUIRE_MESSAGE( check2, "0.d0 .ne. 1.d-12" F90CONCAT C_NULL_CHAR ) ;
 )
 
+TESTCODE(BOOST_AUTO_TEST_CASE, DUMMY, test_example4, version_test_method,
+    integer(KIND=C_INT) :: major, minor, patch ; \
+    call f90tw_version(major, minor, patch) ; \
+    call F90_BOOST_REQUIRE_EQUAL( patch, int( mod( F90TW_VERSION,100), KIND=C_INT)) ; \
+    call F90_BOOST_REQUIRE_EQUAL( minor, int( mod( F90TW_VERSION/100,100), KIND=C_INT)) ; \
+    call F90_BOOST_REQUIRE_EQUAL( major, int( F90TW_VERSION/100000, KIND=C_INT )) ;
+)
+
 /* the end statement of the "test_example" module.
 // expanded in c/c++ makes nothing. */
 ENDTESTMODULE(test_example)

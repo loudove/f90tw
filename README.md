@@ -1,6 +1,6 @@
 f90tw
 =====
-f90tw project provides fortran wrappers for a limitted subset of the [boost](https://www.boost.org/) and [google](https://github.com/google/googletest) test frameworks functionality. At the same time, offers a rather simple mechanism for setting up and managing test suites in fortran projects. All the way down, f90tw implementation follows a preprocessor-based approach. The motivation was to utilize already available test frameworks and assertion implementations with minimal effort.
+f90tw project provides fortran wrappers for a limitted subset of the [boost](https://www.boost.org/) and [google](https://github.com/google/googletest) test frameworks functionality. At the same time, offers a rather simple mechanism for setting up and managing test suites in fortran projects. All the way down, f90tw implementation follows a preprocessor-based approach. The motivation was to utilize already available test frameworks and assertions implementation with minimal effort.
 
 Status
 ------
@@ -8,7 +8,15 @@ Currently (05/2021), the project is under development and further testing is nee
 
 Build
 -----
-You will need to obtain the repository from github and follow the usual cmake build steps. It is assumed that c/c++ and fortran compilers are available and you have installed boost and gtest packages. In short, [clone](https://github.com/git-guides/git-clone) the project from github, enter the project's directory and issue the usual [cmake](https://cmake.org/documentation/) build commands.
+You will need to obtain the repository from github and follow the usual cmake build steps. It is assumed that c/c++ and fortran compilers are available and you have installed boost and gtest packages. In short, [clone](https://github.com/git-guides/git-clone) the project from github, enter the project's directory and issue the usual [cmake](https://cmake.org/documentation/) build commands. On linux boxes, the flow of commands looks like:
+```bash
+% git clone https://github.com/loudove/f90tw
+% cd f90tw
+% mkdir build
+% cd build
+% cmake -DBOOSTFWK=OFF -DGTESTFWK=ON ..
+% make
+```
 
 Using the cmake options `BOOSTFWK` and `GTESTFWK` you can select the framework to be used. `BOOSTFWK` is `ON` by default. You can set them both to `ON` if you like but not to `OFF` since this will signal a cmake configuration error.
 
@@ -22,26 +30,34 @@ A fortran module with the interface of the fortran wrappers and the correspondin
 
 If you include f90tw in your cmake project, the variables `f90tw_INCLUDE_DIR` (pointing to the heads directory) and `f90tw_MODULE_DIR` (pointing to the modules and libraries directory) are defined to help you access f90tw functionality. You can find hinds of f90tw use with cmake in [`example/CMakeLists.txt`](example/CMakeLists.txt).
 
-To facilitate the setup of simple tests, additional header files are provided with their main usage demonstrated in the accompanying example found in the [`example`](example) directory. A detailed walkthrough of the implementation of the examples can be found [here](example/README.md).
+To facilitate the setup of simple tests, additional header files are provided with their main usage demonstrated in the accompanying examples found in the [`example`](example) directory. A detailed walkthrough of the implementation of the examples can be found [here](example/README.md).
 
 Assuming that you want to test the functionality of a fortran module named *example*, implemented in [`example.f90`](example/example.f90). In this case, the test can be implemented with a pair of two files:
 - Boost: a fortran module, ([`test_module_example_boost.fpp`](example/test_module_example_boost.fpp)), with the subroutines implementing the actual tests and its c/c++ pair, [`test_example_boost.cpp`](example/test_example_boost.cpp), implementing the boost tests wrapping their fortran counterparts.
 - Gtest: as you can guess, the pair of files is [`test_module_example_gtest.fpp`](example/test_module_example_gtest.fpp) for fortran, and [`test_example_gtest.cpp`](example/test_example_gtest.cpp) for c/c++. **PLEASE NOTE** that these files should be compiled/preprocessed by setting the USE GTEST preprocessor definition in order to set in the appropriate macros and avoid problems.
 
 The structure of these files is simple and quite similar. In the fortran files, we first include the [`"f90tw_test.h"`](f90tw/f90tw_test.h) header and then the functionality is implemented by using the f90tw preprocessor macros:
-- **TESTMODULE**: (*optional*) module initial statements (declaration, use of the module to be tested and set `imlicit none`). The arguments are:
-( MODULENAME, MODULETOTEST)
+- **TESTMODULE**( MODULENAME, MODULETOTEST): (*optional*) prepares the initial statements of the module(module declaration, use of the module to be tested and set `imlicit none`).
     - MODULENAME: the name of the module
     - MODULETOTEST: the name of the module to test
-- **TESTCODE**: prepares the specific test. The arguments are:
-( *TESTTYPE*, *TESTSUITENAME*, *TESTNAME*, *SUBNAME*, **...** )
+
+- **TESTCODE**( *TESTTYPE*, *TESTSUITENAME*, *TESTNAME*, *SUBNAME*, **...** ): prepares the specific test.
     - *TESTTYPE*: the framework macro to be used for test declaration
     - *TESTSUITENAME*: the name of the test suite
     - *TESTNAME*: the name of the test
     - *SUBNAME*: the name of the fortran subroutine to be implemented
     -  **...** : the rest of the arguments which are essentially, the fortran source code implementing the test.
-    **PLEASE NOTE** that each code line should be terminated with `;` while the string concatenation operator (`//`) should be replaced with the `F90CONCAT` macro and the line continuation operator (`&`) with the `F90LNCONT` macro. Moreover, `F90SPOT` macro expands to the `filename:line` string, while `F90SPOTMSG(MSG)` macro appends the MSG string to it. <u>You can simplify the implementation here by just calling a fortran method implemented elsewhere.</u> This approach is maybe preferable since you will avoid the drawbacks of preprocessing relevant to code's clarity and debugging.
-- **ENDTESTMODULE** : (*optional*) module end statement. The only argument here is the name of the module (MODULENAME) used also with the **TESTMODULE** macro.
+    **PLEASE NOTE** that each code line should be terminated with `";"` while the string concatenation operator (`//`) should be replaced with the `F90CONCAT` macro and the line continuation operator (`&`) with the `F90LNCONT` macro. Moreover, `F90SPOT` macro expands to the `filename:line` string, while `F90SPOTMSG(MSG)` macro appends the MSG string to it. <u>You can simplify the implementation here by just calling a fortran method implemented elsewhere.</u> This approach is maybe preferable since you will avoid the drawbacks of preprocessing relevant to code's clarity and debugging.
+
+- **ENDTESTMODULE**(MODULENAME)  : (*optional*) module end statement.
+    - MODULENAME: the name of the module (the same with the one used with with **TESTMODULE** macro).
+
+In addition to the assertion wrappers for [boost.test](./README.md#Boost.test) and [gtest](./README.md#Gtest), a method for accessing f90tw version is available:
+
+- f90tw_version(*major*, *minor*, *patch*)
+    - *major* : major version
+    - *minor* : minor version
+    - *patch* : patch version
 
 Using this approach, the c++ implementation becomes rather easy since it is based on preprocessing the same fortran file, with different definitions of the macros resulting automatically in a) the declarations of the fortran test methods and b) the framework tests which essentially wrap these methods. A more detailed description of the fortran and c/c++ files is provided [here](example/README.md).
 

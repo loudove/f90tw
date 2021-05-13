@@ -35,14 +35,14 @@ which expands to:
 ```fortran
 ! the name of the function (4th argument of the macro)
 subroutine add_test_method() BIND(C,name="add_test_method")
-   ! test implementation (whatever come afterh the 4th argument of the macro)
+   ! test implementation (whatever comes after the 4th argument of the macro)
    call F90_BOOST_WARN_EQUAL( method( 2,2), 3)
    call F90_BOOST_CHECK_EQUAL( method( 2.0,-1.0), 1.0)
    call F90_BOOST_REQUIRE_EQUAL( method( 1.d0,1.d0), 2.d0) 
 end subroutine add_test_method
 ```
 
-<u>You have to use</u> `";"` for terminating each source line since the preprocessor will output the macro's argument in a single line. Note that currently (05/2021) if `";"` is used in a fortran string will cause compilation problems. Strings concatenation operator `"//"` also results in problems since the preprocessor considers it as c/c++ single line comment and neglects all the next statements. This is why you should use the F90CONCAT macro. For example, the line:
+<u>You have to use</u> `";"` for terminating each source line since the preprocessor will output the macro's argument in a single line. Note that currently (05/2021) if `";"` is used in a fortran string will cause compilation problems. Strings concatenation operator `"//"` also results in problems since the preprocessor considers it as c/c++ single line comment and neglects all the next statements. This is why you should use the `F90CONCAT` macro instead. For example, the line:
 ```fortran
 call F90_BOOST_REQUIRE_MESSAGE( check, "some message" F90CONCAT C_NULL_CHAR ) ;
 ```
@@ -56,7 +56,7 @@ call F90_BOOST_REQUIRE_MESSAGE( check, "some message" /&
 &/ C_NULL_CHAR )
 ```
 
-The rest of the tests (i.e. `test_example2` and `test_example3`) are implemented similarly. In the last one, you case see the use of [`F90SPOT` and `F90SPOTMSG` macros](../READNE.md). 
+The rest of the tests (i.e. `test_example2` and `test_example3`) are implemented similarly. In the last one, you can see the use of [`F90SPOT` and `F90SPOTMSG` macros](../READNE.md). 
 
 In the test(s) implementation, you should use the [boost assertions wrappers](../README.md#Boost.test) as you see fit in your case.
 

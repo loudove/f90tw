@@ -4,7 +4,11 @@
 
 #define F90TESTWRAPPERS
 
-/* #include "f90tw_mangle.h" */
+/*  the version (boost style)
+//  F90TW_VERSION % 100 is the patch level
+//  F90TW_VERSION / 100 % 1000 is the minor version
+//  F90TW_VERSION / 100000 is the major version */
+#define F90TW_VERSION 000100
 
 /* utility macros */
 #define TOSTRHLP(x) #x
@@ -37,6 +41,24 @@
 #define TESTFRK boost
 #endif
 
+/* version */
+#define F90_F90TW_VER \
+     interface f90tw_version ; \
+          subroutine c_f90tw_version( major, minor, patch) BIND(C, name="c_f90tw_version") ; \
+               import C_INT ; \
+               integer(KIND=C_INT), intent(out) :: major, minor, patch ; \
+          end subroutine c_f90tw_version ; \
+     end interface f90tw_version
+
+#define C_F90TW_VER \
+     extern "C" { \
+     void c_f90tw_version(int* major, int* minor, int* patch) { \
+          *patch = F90TW_VERSION % 100; \
+          *minor = F90TW_VERSION / 100 % 1000; \
+          *major = F90TW_VERSION / 100000; \
+          } \
+     }
+
 /* utility macros for simple boost/gtest test implementation */
 
 /* first lines of module TESTNAME for testing module MODNAME using TESTFRK test framework */
@@ -50,7 +72,7 @@
 /* module TESTNAME closure */
 #define F90ENDTESTMODULE(TESTNAME) end module TESTNAME
 
-/* code generation macros, 
+/* code generation macros,
 // H* : c definition
 // C* : c/c++ implementation
 // F* : fortran implemenation. */
