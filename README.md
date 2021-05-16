@@ -41,6 +41,9 @@ The structure of these files is simple and quite similar. In the fortran files, 
     - MODULENAME: the name of the module
     - MODULETOTEST: the name of the module to test
 
+**TESTCONTAINS**: (*optional*) expands to fortran `contain` statement. It is
+separated from TESTMODULE macro to allow for the declaration of module resources common to all tests.
+
 - **TESTCODE**( *TESTTYPE*, *TESTSUITENAME*, *TESTNAME*, *SUBNAME*, **...** ): prepares the specific test.
     - *TESTTYPE*: the framework macro to be used for test declaration
     - *TESTSUITENAME*: the name of the test suite

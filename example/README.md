@@ -23,6 +23,8 @@ module test_example      ! module name (first argument of the macro)
     contains
 ```
 
+The `TESTCONTAINS` macro follows, which expands to the `contain` statement. It was separated from the `TESTMODULE` to leave room for the declaration of module resources common to all the tests implemented in the module.
+
 Now we implement the test(s) in mind with the help of [`TESTCODE`](../README.md#Use) macro:
 ```fortran
 TESTCODE(BOOST_AUTO_TEST_CASE, DUMMY, test_example1, add_test_method,

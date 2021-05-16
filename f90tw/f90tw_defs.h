@@ -66,8 +66,9 @@
     module TESTNAME; \
         use CONCAT2(assertions,TESTFRK,_) ;  \
         use MODNAME; \
-        implicit none; \
-        contains
+        implicit none
+
+#define F90TESTCONTAINS contains
 
 /* module TESTNAME closure */
 #define F90ENDTESTMODULE(TESTNAME) end module TESTNAME

@@ -7,6 +7,12 @@
 // expanded in c/c++ makes nothing. */
 TESTMODULE(test_example, example)
 
+/* expanded in fortran to contains statement. it is
+// separated from TESTMODULE macro to allow for the
+// declaration of module resources.
+// */
+TESTCONTAINS
+
 /* place a test and it fortran implementation. 
 //
 // expanded in fortran, results in module procedure 
