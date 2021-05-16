@@ -3,51 +3,31 @@ add_library( example STATIC example.f90 )
 set_property( TARGET example PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if ( USEBOOST )
-    # compile the fortran tests(s) in one library STATIC or OBJECT
-    set ( ftest "${CMAKE_CURRENT_BINARY_DIR}/test_module_example_boost.f90" )
-    set ( ftestfpp "${CMAKE_CURRENT_SOURCE_DIR}/test_module_example_boost.fpp" )
-    add_library( test_example_boost_f90 STATIC "${ftest}" )
-    set_property( TARGET test_example_boost_f90 PROPERTY POSITION_INDEPENDENT_CODE ON )
-    target_include_directories( test_example_boost_f90 PRIVATE ${f90tw_INCLUDE_DIR} ${f90tw_MODULES_DIR} )
-    set_target_properties( test_example_boost_f90 PROPERTIES Fortran_MODULE_DIRECTORY ${f90tw_MODULES_DIR} )
-    set_property( TARGET test_example_boost_f90
-        APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${ftest}"
-    )
-    FORTRANFPP ( "${ftestfpp}" "${ftest}"
-        EXE ${FPP_EXE} OPTIONS ${FPP_OPTIONS} SWITCH ${FPP_SWITCH} INCLUDES ${f90tw_INCLUDE_DIR}
-    )
-    target_link_libraries( test_example_boost_f90 example f90tw_boost )
 
-    # create the test exe from the cpp
-    add_executable( test_example_boost test_example_boost.cpp  )
-    target_include_directories( test_example_boost PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${f90tw_INCLUDE_DIR} )
-    target_link_libraries( test_example_boost f90tw_boost test_example_boost_f90 ${Boost_LIBRARIES} )
+    F90TWTEST ( test_example_boost 
+        CFILES test_example_boost.cpp
+        FPPFILES test_module_example_boost.fpp
+        OUTDIR "${CMAKE_CURRENT_BINARY_DIR}"
+        EXE ${FPP_EXE} OPTIONS ${FPP_OPTIONS} SWITCH ${FPP_SWITCH}
+        INCLUDES ${f90tw_INCLUDE_DIR}
+        MODULES ${f90tw_MODULES_DIR}
+        LIBRARIES example f90tw_boost
+        DEFINITIONS USEBOOST
+    )
 
 endif()
 
 if ( USEGTEST )
-    # compile the fortran tests in one library (gtest, so simular to boost)
-    set ( ftest "${CMAKE_CURRENT_BINARY_DIR}/test_module_example_gtest.f90" )
-    set ( ftestfpp "${CMAKE_CURRENT_SOURCE_DIR}/test_module_example_gtest.fpp" )
-    add_library( test_example_gtest_f90 STATIC "${ftest}" )
-    set_property( TARGET test_example_gtest_f90 PROPERTY POSITION_INDEPENDENT_CODE ON)
-    target_include_directories( test_example_gtest_f90 PRIVATE ${f90tw_INCLUDE_DIR} ${f90tw_MODULES_DIR} )
-    set_target_properties( test_example_gtest_f90 PROPERTIES Fortran_MODULE_DIRECTORY ${f90tw_MODULES_DIR} )
-    set_property( TARGET test_example_gtest_f90
-        APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${ftest}"
-    )
-    FORTRANFPP ( "${ftestfpp}" "${ftest}"
+
+    F90TWTEST ( test_example_gtest 
+        CFILES test_example_gtest.cpp
+        FPPFILES test_module_example_gtest.fpp
+        OUTDIR "${CMAKE_CURRENT_BINARY_DIR}"
         EXE ${FPP_EXE} OPTIONS ${FPP_OPTIONS} SWITCH ${FPP_SWITCH}
-        INCLUDES ${f90tw_INCLUDE_DIR} DEFINITIONS USEGTEST
+        INCLUDES ${f90tw_INCLUDE_DIR}
+        MODULES ${f90tw_MODULES_DIR}
+        LIBRARIES example f90tw_gtest
+        DEFINITIONS USEGTEST
     )
-    target_link_libraries( test_example_gtest_f90 example f90tw_gtest )
 
-    # create the test exe from the cpp
-    add_executable( test_example_gtest test_example_gtest.cpp  )
-    target_include_directories( test_example_gtest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${f90tw_INCLUDE_DIR} ${gtest_INCLUDE_DIR} )
-    target_link_libraries( test_example_gtest f90tw_gtest test_example_gtest_f90 gtest_main )
-    target_compile_definitions( test_example_gtest PUBLIC USEGTEST)
 endif()
-
-# add the test test to the suite (BUILD AND USE ONLY ONE FMK)
-# add_test(NAME test_module COMMAND test_example)
