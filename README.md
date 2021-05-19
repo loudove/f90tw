@@ -41,7 +41,7 @@ The structure of these files is simple and quite similar. In the fortran files, 
     - MODULENAME: the name of the module
     - MODULETOTEST: the name of the module to test
 
-**TESTCONTAINS**: (*optional*) expands to fortran `contain` statement. It is
+- **TESTCONTAINS**: (*optional*) expands to fortran `contain` statement. It is
 separated from TESTMODULE macro to allow for the declaration of module resources common to all tests.
 
 - **TESTCODE**( *TESTTYPE*, *TESTSUITENAME*, *TESTNAME*, *SUBNAME*, **...** ): prepares the specific test.
@@ -50,7 +50,7 @@ separated from TESTMODULE macro to allow for the declaration of module resources
     - *TESTNAME*: the name of the test
     - *SUBNAME*: the name of the fortran subroutine to be implemented
     -  **...** : the rest of the arguments which are essentially, the fortran source code implementing the test.
-    **PLEASE NOTE** that each code line should be terminated with `";"` while the string concatenation operator (`//`) should be replaced with the `F90CONCAT` macro and the line continuation operator (`&`) with the `F90LNCONT` macro. Moreover, `F90SPOT` macro expands to the `filename:line` string, while `F90SPOTMSG(MSG)` macro appends the MSG string to it. <u>You can simplify the implementation here by just calling a fortran method implemented elsewhere.</u> This approach is maybe preferable since you will avoid the drawbacks of preprocessing relevant to code's clarity and debugging.
+    **PLEASE NOTE** that each code line should be terminated with `";"`. The use of pound character (`"#"`) in fortran string renders preprocessing impossible, while, in order to avoid similar catastrofic errors, the string concatenation operator (`//`) should be replaced with the `F90CONCAT` macro and the line continuation operator (`&`) with the `F90LNCONT` macro. Moreover, `F90SPOT` macro expands to the `filename:line` string, while `F90SPOTMSG(MSG)` macro appends the MSG string to it. <u>You can simplify the implementation by just calling a fortran method implemented elsewhere.</u> This approach is maybe preferable since you will avoid the drawbacks of preprocessing relevant to code's clarity and debugging.
 
 - **ENDTESTMODULE**(MODULENAME)  : (*optional*) module end statement.
     - MODULENAME: the name of the module (the same with the one used with with **TESTMODULE** macro).
