@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-#include "f90tw_defs.h"
+#include "f90tw_defs_gtest.h"
 
 /* get the test defined in the corresponding file
 // and create the definitions of the fortran methods

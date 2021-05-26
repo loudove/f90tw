@@ -4,6 +4,6 @@
 // (defined in f90tw_boost) and essentially wrapping the 
 // Fortran tests subroutines to result in the corresponding
 //  c/c++ implementation of the boost.test fwk. */
-#define CURRENTTESTFILE "test_module_example_boost.fpp"
+#define CURRENTTESTFILE "test_example_boost.fpp"
 
 #include "f90tw_boost.h"

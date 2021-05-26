@@ -1,5 +1,5 @@
-# check if FILENAME is an absolute path and 
-# return the absolute path of the file and 
+# check if FILENAME is an absolute path and
+# return the absolute path of the file and
 # the container directory
 function ( F90TWCHKPATH FILENAME RETFILENAMEFULL RETFILEDIRECTORY )
 
@@ -28,7 +28,7 @@ function( F90TWFPP INFILE OUTFILE )
 
     set( prefix FPP )
     set( flags )
-    set( singleValues EXE SWITCH)
+    set( singleValues EXE SWITCH DEPENDS )
     set( multiValues OPTIONS INCLUDES DEFINITIONS )
 
     include(CMakeParseArguments)
@@ -55,7 +55,7 @@ function( F90TWFPP INFILE OUTFILE )
         add_custom_command(
             OUTPUT ${OUTFILE}
             COMMAND ${POWERSHELL_EXE} -Command " \" ( ${FPP_EXE} ${FPPOPTS} ${FPPDEFS} ${FPPINCL} ${INFILE})  -replace ';', \\\"`n\\\" | select-string -pattern '^#' -notmatch | Set-Content -Path ${OUTFILE} \" "
-            DEPENDS ${INFILE}
+            DEPENDS ${INFILE} ${FPP_DEPENDS}
             COMMENT "precompile ${INFILE}"
         )
     else()
@@ -63,8 +63,45 @@ function( F90TWFPP INFILE OUTFILE )
         find_program ( TR_EXE NAMES "tr" REQUIRED)
         add_custom_command(
             OUTPUT ${OUTFILE}
-            COMMAND ${FPP_EXE} ${FPPOPTS} ${FPPDEFS} ${FPPINCL} ${INFILE} | ${SED_EXE} \"/\#/d\" | ${TR_EXE} \"\;\" \"\\n\" > ${OUTFILE}
-            DEPENDS ${INFILE}
+            COMMAND ${FPP_EXE} ${FPPOPTS} ${FPPDEFS} ${FPPINCL} ${INFILE} | ${SED_EXE} \"/^[ \\t]*\#/d\" | ${TR_EXE} \"\;\" \"\\n\" > ${OUTFILE}
+            DEPENDS ${INFILE} ${FPP_DEPENDS}
+            COMMENT "precompile ${INFILE}"
+        )
+    endif()
+
+endfunction()
+
+# extruct the f90tw directive from the given fortran files
+# INFILES: f90 files with f90tw directived to be extructed
+# OUTFILE: header file to place the extructed directives
+function( F90TWF2H INFILES OUTFILE )
+
+    set( prefix F2H )
+    set( flags )
+    set( singleValues OUTFILE )
+    set( multiValues INFILES )
+
+    include(CMakeParseArguments)
+    cmake_parse_arguments(PARSE_ARGV 0 ${prefix}
+                    "${flags}"
+                    "${singleValues}"
+                    "${multiValues}"
+    )
+
+    if(CMAKE_SYSTEM_NAME STREQUAL Windows)
+        find_program ( POWERSHELL_EXE NAMES "powershell.exe" REQUIRED)
+        add_custom_command(
+            OUTPUT ${F2H_OUTFILE}
+            COMMAND ${POWERSHELL_EXE} -Command " \" ( cat ${F2H_INFILES})  | select-string -pattern '^[\t]*[!cC]$[fF][tT][wW]' | replace '^[\t]*[!cC]$[fF][tT][wW][\t]*', '' | Set-Content -Path ${F2H_OUTFILE} \" "
+            DEPENDS ${F2H_INFILES}
+            COMMENT "precompile ${INFILE}"
+        )
+    else()
+        find_program ( SED_EXE NAMES "sed" REQUIRED)
+        add_custom_command(
+            OUTPUT ${F2H_OUTFILE}
+            COMMAND ${SED_EXE} '/^[ \\t]*[!cC]\$$[fF]90[tT][wW] /!d \; s/.*[!cC]\$$[fF]90[tT][wW]\\\(.*\\\)$$/\\1/' ${F2H_INFILES}  >>  ${F2H_OUTFILE}
+            DEPENDS ${F2H_INFILES}
             COMMENT "precompile ${INFILE}"
         )
     endif()
@@ -80,7 +117,7 @@ function( F90TWFPPFILES )
 
     set( prefix FPP )
     set( flags )
-    set( singleValues EXE SWITCH OUTDIR )
+    set( singleValues EXE SWITCH OUTDIR DEPENDS )
     set( multiValues INFILES OUTFILES OPTIONS INCLUDES DEFINITIONS )
 
     include(CMakeParseArguments)
@@ -92,7 +129,7 @@ function( F90TWFPPFILES )
 
     list( LENGTH FPP_OUTFILES outlen )
     list( LENGTH FPP_INFILES inlen )
-    # if the list of the output files is not given the create
+    # if the list of the output files is not given then create
     # it based on the given input files.
     if ( NOT ${outlen} EQUAL ${inlen} )
         foreach( fppinfile ${FPP_INFILES} )
@@ -115,6 +152,7 @@ function( F90TWFPPFILES )
             OPTIONS ${FPP_OPTIONS}
             INCLUDES ${FPP_INCLUDES}
             DEFINITIONS ${FPP_DEFINITIONS}
+            DEPENDS ${FPP_DEPENDS}
         )
     endforeach()
 
@@ -125,14 +163,17 @@ endfunction()
 # CFILES : list of c/c++ files
 # F90FILES : list of fortran files
 # FPPFILES : list of fortran files to be preprocessed (using f90tw)
+# F2HNAME : the name of the header with the directived found in F2HFILES. if not provided
+#           the name "${NAME}_f90.h" will be used
+# F2HFILES : list of fortran files to be processed for extructing f90tw directives
 # MODULES : list of modules direactories
 # the rest of the arguments are the arguments of F90TWFPP and F90TWFPPFILES functions.
 function( F90TWTEST NAME )
 
     set( prefix FTW )
     set( flags )
-    set( singleValues F90TWFWK EXE SWITCH OUTDIR )
-    set( multiValues CFILES F90FILES FPPFILES OPTIONS LIBRARIES INCLUDES MODULES DEFINITIONS )
+    set( singleValues F90TWFWK EXE SWITCH OUTDIR F2HNAME )
+    set( multiValues CFILES F90FILES FPPFILES F2HFILES OPTIONS LIBRARIES INCLUDES MODULES DEFINITIONS )
 
     include(CMakeParseArguments)
     cmake_parse_arguments(PARSE_ARGV 1 ${prefix}
@@ -141,6 +182,20 @@ function( F90TWTEST NAME )
                     "${multiValues}"
         )
 
+    # create the fortran header files
+    if ( NOT "${FTW_F2HFILES}" STREQUAL "" )
+        if ( NOT "${FTW_F2HNAME}" STREQUAL "" )
+            set( F2HNAME ${FTW_F2HNAME} )
+        else()
+            list( GET FTW_F2HFILES 0 firstfile )
+            get_filename_component( firstfilename "${firstfile}" NAME  )
+            set( F2HNAME "${firstfilename}.h" )
+        endif()
+        set( F2HFILE "${CMAKE_CURRENT_BINARY_DIR}/${F2HNAME}" )
+        F90TWF2H ( INFILES ${FTW_F2HFILES} OUTFILE ${F2HFILE} )
+    else()
+        set( F2HFILE )
+    endif()
     # create the fortran library
     foreach( fppinfile ${FTW_FPPFILES} )
         get_filename_component( f90filename "${fppinfile}" NAME_WE  )
@@ -150,8 +205,7 @@ function( F90TWTEST NAME )
         list ( FIND FPPINCLDS ${fppinfiledir} chk )
         if ( chk EQUAL -1 )
           list ( APPEND FPPINCLDS ${fppinfiledir} )
-        endif()        
-
+        endif()
 
         set ( f90file "${FTW_OUTDIR}/${f90filename}.f90")
         list ( APPEND XF90FILES ${f90file} )
@@ -161,21 +215,25 @@ function( F90TWTEST NAME )
         INFILES ${XFPPFILES} OUTFILES ${XF90FILES}
         EXE ${FTW_EXE} OPTIONS ${FTW_OPTIONS}  SWITCH ${FTW_SWITCH}
         INCLUDES ${FTW_INCLUDES} DEFINITIONS ${FTW_DEFINITIONS}
+        DEPENDS ${F2HFILE}
     )
 
     set ( FLIBNAME "${NAME}_f90" )
     add_library ( "${FLIBNAME}" STATIC ${XF90FILES} ${FTW_F90FILES} )
     set_property( TARGET ${FLIBNAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
-    target_include_directories( ${FLIBNAME} PRIVATE ${FTW_INCLUDES} ${FTW_MODULES} )
+    target_include_directories( ${FLIBNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${FTW_INCLUDES} ${FTW_MODULES} )
     set_target_properties( ${FLIBNAME} PROPERTIES Fortran_MODULE_DIRECTORY ${FTW_MODULES} )
     set_property( TARGET ${FLIBNAME}
         APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${XF90FILES}
     )
+    if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+    target_compile_options( ${FLIBNAME} PRIVATE "-ffree-line-length-none" )
+    endif()
     target_link_libraries( ${FLIBNAME} PUBLIC ${FTW_LIBRARIES} )
 
     # compile c and create the executable
-    add_executable( ${NAME} ${FTW_CFILES}  )
-    target_include_directories( ${NAME} PRIVATE ${FPPINCLDS} ${FTW_INCLUDES} )
+    add_executable( ${NAME} ${FTW_CFILES} ${F2HFILE} )
+    target_include_directories( ${NAME} PRIVATE ${FPPINCLDS} ${CMAKE_CURRENT_BINARY_DIR} ${FTW_INCLUDES} )
     target_link_libraries( ${NAME} ${FLIBNAME} ${FTW_LIBRARIES})
     target_compile_definitions( ${NAME} PUBLIC ${FTW_DEFINITIONS} )
 
@@ -238,7 +296,7 @@ if ( USEBOOST )
     add_library( f90tw_boost STATIC boost_assertions.cpp )
     set_property ( TARGET f90tw_boost PROPERTY POSITION_INDEPENDENT_CODE ON)
     target_include_directories( f90tw_boost PUBLIC ${Boost_INCLUDE_DIRS} )
-    target_link_libraries( f90tw_boost PUBLIC ${Boost_LIBRARIES} )
+    target_link_libraries( f90tw_boost PUBLIC f90twi_boost ${Boost_LIBRARIES} )
 
     set ( file1fpp "${CMAKE_CURRENT_SOURCE_DIR}/assertions_boost.fpp" )
     set ( file1 "${CMAKE_CURRENT_BINARY_DIR}/assertions_boost.f90" )
@@ -260,9 +318,8 @@ if ( USEGTEST )
     add_library( f90tw_gtest STATIC gtest_assertions.cpp )
     set_property ( TARGET f90tw_gtest PROPERTY POSITION_INDEPENDENT_CODE ON)
     target_include_directories( f90tw_gtest PUBLIC ${gtest_INCLUDE_DIR} )
-    target_link_libraries( f90tw_gtest PUBLIC gtest_main )
-    target_compile_definitions( f90tw_gtest PUBLIC USEGTEST)
-
+    target_link_libraries( f90tw_gtest PUBLIC f90twi_gtest gtest_main )
+    target_compile_definitions( f90tw_gtest PUBLIC f90twi_gtest USEGTEST)
 
     set ( file2fpp "${CMAKE_CURRENT_SOURCE_DIR}/assertions_gtest.fpp" )
     set ( file2 "${CMAKE_CURRENT_BINARY_DIR}/assertions_gtest.f90" )

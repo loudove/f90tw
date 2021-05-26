@@ -23,6 +23,7 @@ extern "C" {
 #endif
 #ifdef DOSTR
         GTESTFUNCTION(LEVEL,WHAT,NAME1,NAME2)
+
         GTESTFUNCTIONM(LEVEL,WHAT,NAME1,NAME2)
 #endif
 }

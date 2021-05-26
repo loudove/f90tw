@@ -96,5 +96,13 @@ add_subdirectory( f90tw )
 message ( STATUS "f90tw_INCLUDE_DIR is ${f90tw_INCLUDE_DIR}" )
 message ( STATUS "f90tw_MODULES_DIR is ${f90tw_MODULES_DIR}" )
 
-# build f90tw example
-add_subdirectory(example)
+if ( DEFINED TESTS AND TESTS )
+# build f90tw api tests
+add_subdirectory(tests)
+endif()
+
+
+if ( DEFINED EXAMPLES AND EXAMPLES )
+# build f90tw examples
+add_subdirectory(examples)
+endif()

@@ -6,7 +6,7 @@ if ( USEBOOST )
 
     F90TWTEST ( test_example_boost 
         CFILES test_example_boost.cpp
-        FPPFILES test_module_example_boost.fpp
+        FPPFILES test_example_boost.fpp
         OUTDIR "${CMAKE_CURRENT_BINARY_DIR}"
         EXE ${FPP_EXE} OPTIONS ${FPP_OPTIONS} SWITCH ${FPP_SWITCH}
         INCLUDES ${f90tw_INCLUDE_DIR}
@@ -21,7 +21,8 @@ if ( USEGTEST )
 
     F90TWTEST ( test_example_gtest 
         CFILES test_example_gtest.cpp
-        FPPFILES test_module_example_gtest.fpp
+        F90FILES test_example_gtest.f90
+        F2HFILES ${CMAKE_CURRENT_SOURCE_DIR}/test_example_gtest.f90
         OUTDIR "${CMAKE_CURRENT_BINARY_DIR}"
         EXE ${FPP_EXE} OPTIONS ${FPP_OPTIONS} SWITCH ${FPP_SWITCH}
         INCLUDES ${f90tw_INCLUDE_DIR}

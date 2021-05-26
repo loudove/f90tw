@@ -1,4 +1,4 @@
-#include "f90tw_defs.h"
+#include "f90tw_defs_gtest.h"
 
 module assertions_gtest
 
@@ -17,7 +17,19 @@ module assertions_gtest
 #define GTESTFUNCTION2STRM F90_GTEST_LEVEL_CHECK1T2STRM
 #define GTESTFUNCTION3 F90_GTEST_LEVEL_CHECK1T3A
 #define GTESTFUNCTION3M F90_GTEST_LEVEL_CHECK1T3AM
+
+#define DOINTERFACE
 #include "gtest_what.h"
+
+contains
+
+
+#undef DOINTERFACE
+#define CAST CAST_IMPLEMENT
+#define DIM1 DIM1_IMPLEMENT
+#define DIM2 DIM2_IMPLEMENT
+#include "gtest_what.h"
+
 #undef GTESTFUNCTION3M
 #undef GTESTFUNCTION3
 #undef GTESTFUNCTION2STRM

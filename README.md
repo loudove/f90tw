@@ -67,45 +67,41 @@ Using this approach, the c++ implementation becomes rather easy since it is base
 Boost.test assertions tests
 ---------------------------
 
-The following subset of boost.test framework is supported:
+The following subset of boost.test framework is supported with &lt;level&gt; = (WARN&#124;CHECK&#124;REQUIRE) :
 
-Fortran | C/C++ | level | argumens type
-------- | ----- | ----- | -------------
-F90_BOOST_&lt;level&gt;_BITWISE_EQUAL | BOOST_&lt;level&gt;_BITWISE_EQUAL | (WARN&#124;CHECK&#124;REQUIRE) | integer(KIND=C_INT)
-F90_BOOST_&lt;level&gt;_EQUAL | BOOST_&lt;level&gt;_EQUAL | (WARN&#124;CHECK&#124;REQUIRE) | logical(KIND=C_BOOL), integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_NE | BOOST_&lt;level&gt;_NE | (WARN&#124;CHECK&#124;REQUIRE) | logical(KIND=C_BOOL), integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_CLOSE | BOOST_&lt;level&gt;_CLOSE | (WARN&#124;CHECK&#124;REQUIRE) | real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_CLOSE_FRACTION | BOOST_&lt;level&gt;_CLOSE_FRACTION | (WARN&#124;CHECK&#124;REQUIRE) | real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_SMALL | BOOST_&lt;level&gt;_SMALL | (WARN&#124;CHECK&#124;REQUIRE) | real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_GE | BOOST_&lt;level&gt;_GE | (WARN&#124;CHECK&#124;REQUIRE) | integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_GT | BOOST_&lt;level&gt;_GT | (WARN&#124;CHECK&#124;REQUIRE) | integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_LE | BOOST_&lt;level&gt;_LE | (WARN&#124;CHECK&#124;REQUIRE) | integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_&lt;level&gt;_LT | BOOST_&lt;level&gt;_LT | (WARN&#124;CHECK&#124;REQUIRE) | integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_BOOST_TEST_MESSAGE | BOOST_TEST_MESSAGE | - | character(KIND=C_CHAR,LEN=*)
-F90_BOOST_TEST_ERROR | BOOST_TEST_ERROR | - | character(KIND=C_CHAR,LEN=*)
-F90_BOOST_TEST_FAIL | BOOST_TEST_FAIL | - | character(KIND=C_CHAR,LEN=*)
-F90_BOOST_TEST_CHECKPOINT | BOOST_TEST_CHECKPOINT | - | character(KIND=C_CHAR,LEN=*)
-F90_BOOST_TEST_INFO | BOOST_TEST_INFO | - | character(KIND=C_CHAR,LEN=*)
-F90_BOOST_TEST_INFO_SCOPE | BOOST_TEST_INFO_SCOPE | - | character(KIND=C_CHAR,LEN=*)
-F90_BOOST_TEST_CONTEXT | BOOST_TEST_CONTEXT | - | character(KIND=C_CHAR,LEN=*)
-F90_BOOST_TEST_PASSPOINT | BOOST_TEST_PASSPOINT | - | character(KIND=C_CHAR,LEN=*)
+Fortran (F90_&lt;C/C++&gt;) | operator | argumens type
+--------------------------- | -------- | -------------
+F90_BOOST_&lt;level&gt;_&lt;operator&gt; | MESSAGE <sup>(*)</sup> | logical(KIND=(C_BOOL&#124;4)),<br> integer(KIND=C_INT)
+F90_BOOST_&lt;level&gt;_&lt;operator&gt; | BITWISE_EQUAL <sup>(*)</sup> | integer(KIND=C_INT)
+F90_BOOST_&lt;level&gt;_&lt;operator&gt; | (EQUAL&#124;NE) | logical(KIND=(C_BOOL&#124;4)),<br> integer(KIND=C_INT),<br> real(KIND=C_FLOAT),<br> real(KIND=C_DOUBLE)
+F90_BOOST_&lt;level&gt;_&lt;operator&gt; | (CLOSE&#124;CLOSE_FRACTION) <sup>(*)</sup> | real(KIND=C_FLOAT),<br> real(KIND=C_DOUBLE)
+F90_BOOST_&lt;level&gt;_&lt;operator&gt; | SMALL | real(KIND=C_FLOAT),<br> real(KIND=C_DOUBLE)
+F90_BOOST_&lt;level&gt;_&lt;operator&gt; | (GE&#124;GT&#124;LE&#124;LT) | integer(KIND=C_INT),<br> real(KIND=C_FLOAT),<br> real(KIND=C_DOUBLE)
+F90_BOOST_TEST_MESSAGE | - | character(KIND=C_CHAR,LEN=*)
+F90_BOOST_TEST_ERROR | - | character(KIND=C_CHAR,LEN=*)
+F90_BOOST_TEST_FAIL | - | character(KIND=C_CHAR,LEN=*)
+F90_BOOST_TEST_CHECKPOINT | - | character(KIND=C_CHAR,LEN=*)
+F90_BOOST_TEST_INFO | - | character(KIND=C_CHAR,LEN=*)
+F90_BOOST_TEST_INFO_SCOPE | - | character(KIND=C_CHAR,LEN=*)
+F90_BOOST_TEST_CONTEXT | - | character(KIND=C_CHAR,LEN=*)
+F90_BOOST_TEST_PASSPOINT | - | character(KIND=C_CHAR,LEN=*)
 
 For more details please check the [Boost.Test](https://www.boost.org/doc/) documentation.
 
 Gtest assertions tests
 ----------------------
 
-The following subset of gtest framework is supported:
+The following subset of gtest framework is supported with &lt;level&gt; : (ASSERT&#124;EXPECT) :
 
-Fortran | C/C++ | level | operator | argumens type
-------- | ----- | ----- | -------- | -------------
-F90_&lt;level&gt;_&lt;operator&gt; | &lt;level&gt;__&lt;operator&gt | (ASSERT&#124;EXPECT) | (EQ&#124;NE) | logical(KIND=C_BOOL), integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_&lt;level&gt;_&lt;operator&gt; | &lt;level&gt;__&lt;operator&gt | (ASSERT&#124;EXPECT) | (GT&#124;GE&#124;LT&#124;LE) | integer(KIND=C_INT), real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_&lt;level&gt;_FLOAT_EQ | &lt;level&gt;_FLOAT_EQ | (ASSERT&#124;EXPECT) | - | real(KIND=C_FLOAT)
-F90_&lt;level&gt;_DOUBLE_EQ | &lt;level&gt;_DOUBLE_EQ | (ASSERT&#124;EXPECT) | - | real(KIND=C_DOUBLE)
-F90_&lt;level&gt;_NEAR | &lt;level&gt;_NEAR | (ASSERT&#124;EXPECT) | - | real(KIND=C_FLOAT), real(KIND=C_DOUBLE)
-F90_&lt;level&gt;_&lt;operator&gt; | &lt;level&gt;__&lt;operator&gt | (ASSERT&#124;EXPECT) | (TRUE&#124;FALSE) | logical(KIND=C_BOOL)
-F90_&lt;level&gt;_&lt;operator&gt; | &lt;level&gt;__&lt;operator&gt | (ASSERT&#124;EXPECT) | (STREQ&#124;STRNE&#124;STRCASEEQ&#124;STRCASENE) | character(KIND=C_CHAR,LEN=*)
+Fortran (F90_&lt;C/C++&gt;) | operator | argumens type
+--------------------------- | -------- | -------------
+F90_&lt;level&gt;_&lt;operator&gt; |  (EQ&#124;NE) | logical(KIND=(C_BOOL&#124;4)),<br> integer(KIND=C_INT),<br> real(KIND=C_FLOAT),<br> real(KIND=C_DOUBLE)
+F90_&lt;level&gt;_&lt;operator&gt; |  (GT&#124;GE&#124;LT&#124;LE) | integer(KIND=C_INT),<br> real(KIND=C_FLOAT),<br> real(KIND=C_DOUBLE)
+F90_&lt;level&gt;_FLOAT_EQ <sup>(*)</sup> |  - | real(KIND=C_FLOAT)
+F90_&lt;level&gt;_DOUBLE_EQ <sup>(*)</sup> |  - | real(KIND=C_DOUBLE)
+F90_&lt;level&gt;_NEAR <sup>(*)</sup> |  - | real(KIND=C_FLOAT),<br> real(KIND=C_DOUBLE)
+F90_&lt;level&gt;_&lt;operator&gt; |  (TRUE&#124;FALSE) <sup>(*)</sup> | logical(KIND=(C_BOOL&#124;4))
+F90_&lt;level&gt;_&lt;operator&gt; |  (STREQ&#124;STRNE&#124;<br>STRCASEEQ&#124;STRCASENE) | character(KIND=C_CHAR,LEN=*)
 
 In the gtest case, all the assertion methods can be used with a message as the last argument (of type character(KIND=C_CHAR,LEN=*) ) in order to overwrite the default assertion message.
 

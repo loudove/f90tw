@@ -2,6 +2,8 @@
 
 #include "f90tw_defs.h"
 
+#define F90TWUSE( ... ) use __VA_ARGS__ ;
+#define F90TWSUB( SUB, ... ) call SUB ( __VA_ARGS__ ) ;
 #define F90CONCAT /&;&/
 #define F90LNCONT &;&
 #define F90TOSTR(STRVAR,VARNAME,VARFMT) write(STRVAR,VARFMT) VARNAME

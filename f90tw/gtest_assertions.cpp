@@ -2,7 +2,7 @@
 // comprehensive source file. */
 #include "gtest/gtest.h"
 
-#include "f90tw_defs.h"
+#include "f90tw_defs_gtest.h"
 
 #define HEADERLEVEL "gtest_level.h"
 #define HEADERLEVELWHAT "implement_gtest_wrappers.h"
@@ -15,7 +15,11 @@
 #define GTESTFUNCTION2STRM C_GTEST_LEVEL_CHECK1T2STRM
 #define GTESTFUNCTION3 C_GTEST_LEVEL_CHECK1T3A
 #define GTESTFUNCTION3M C_GTEST_LEVEL_CHECK1T3AM
+
+#define DOINTERFACE
 #include "gtest_what.h"
+#undef DOINTERFACE
+
 #undef GTESTFUNCTION3M
 #undef GTESTFUNCTION3
 #undef GTESTFUNCTION2STRM
