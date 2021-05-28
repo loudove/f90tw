@@ -33,8 +33,8 @@
 #define CONCAT5(a,b,c,d,e,w) CONCAT(a,CONCAT(w,CONCAT4(b,c,d,e,w)))
 #define CONCAT6(a,b,c,d,e,f,w) CONCAT(a,CONCAT(w,CONCAT5(b,c,d,e,f,w)))
 #define PREPENDF90(x) CONCAT2(F90,x,_)
-#define REVERCED(Α, Β) Β, Α
-#define REVERCE(Α) REVERCED(Α)
+#define REVERCED(a,b) b,a
+#define REVERCE(a) REVERCED(a)
 
 /* set boost as the default test framework TESTFRK =(boost|gtest) */
 #if defined(USEGTEST)

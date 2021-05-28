@@ -51,6 +51,7 @@ function( F90TWFPP INFILE OUTFILE )
     set( FPPDEFS "${DEFS}" )
     set( FPPINCL "${INCL}" )
     if(CMAKE_SYSTEM_NAME STREQUAL Windows)
+        string( REPLACE ";" " " FPPINCL "${INCL}" )
         find_program ( POWERSHELL_EXE NAMES "powershell.exe" REQUIRED)
         add_custom_command(
             OUTPUT ${OUTFILE}
@@ -92,9 +93,9 @@ function( F90TWF2H INFILES OUTFILE )
         find_program ( POWERSHELL_EXE NAMES "powershell.exe" REQUIRED)
         add_custom_command(
             OUTPUT ${F2H_OUTFILE}
-            COMMAND ${POWERSHELL_EXE} -Command " \" ( cat ${F2H_INFILES})  | select-string -pattern '^[\t]*[!cC]$[fF][tT][wW]' | replace '^[\t]*[!cC]$[fF][tT][wW][\t]*', '' | Set-Content -Path ${F2H_OUTFILE} \" "
+            COMMAND ${POWERSHELL_EXE} -Command " \" ( ( cat ${F2H_INFILES} ) | select-string -pattern '^[ \\t]*[!cC][\\$$][fF]90[tT][wW]' ) -replace '^[ \\t]*[!cC][\\$$][fF]90[tT][wW][ \\t]', '' | Set-Content -Path ${F2H_OUTFILE} \" "
             DEPENDS ${F2H_INFILES}
-            COMMENT "precompile ${INFILE}"
+            COMMENT "process ${F2H_INFILES}"
         )
     else()
         find_program ( SED_EXE NAMES "sed" REQUIRED)
@@ -102,7 +103,7 @@ function( F90TWF2H INFILES OUTFILE )
             OUTPUT ${F2H_OUTFILE}
             COMMAND ${SED_EXE} '/^[ \\t]*[!cC]\$$[fF]90[tT][wW] /!d \; s/.*[!cC]\$$[fF]90[tT][wW]\\\(.*\\\)$$/\\1/' ${F2H_INFILES}  >>  ${F2H_OUTFILE}
             DEPENDS ${F2H_INFILES}
-            COMMENT "precompile ${INFILE}"
+            COMMENT "process ${F2H_INFILES}"
         )
     endif()
 
@@ -182,6 +183,9 @@ function( F90TWTEST NAME )
                     "${multiValues}"
         )
 
+    set ( FLIBNAME "${NAME}_f90" )
+    set ( F2HTRGNAME "${NAME}_f2h" )
+
     # create the fortran header files
     if ( NOT "${FTW_F2HFILES}" STREQUAL "" )
         if ( NOT "${FTW_F2HNAME}" STREQUAL "" )
@@ -193,9 +197,11 @@ function( F90TWTEST NAME )
         endif()
         set( F2HFILE "${CMAKE_CURRENT_BINARY_DIR}/${F2HNAME}" )
         F90TWF2H ( INFILES ${FTW_F2HFILES} OUTFILE ${F2HFILE} )
+        add_custom_target( ${F2HTRGNAME} ALL DEPENDS ${F2HFILE} )
     else()
         set( F2HFILE )
     endif()
+
     # create the fortran library
     foreach( fppinfile ${FTW_FPPFILES} )
         get_filename_component( f90filename "${fppinfile}" NAME_WE  )
@@ -218,8 +224,7 @@ function( F90TWTEST NAME )
         DEPENDS ${F2HFILE}
     )
 
-    set ( FLIBNAME "${NAME}_f90" )
-    add_library ( "${FLIBNAME}" STATIC ${XF90FILES} ${FTW_F90FILES} )
+    add_library ( ${FLIBNAME} STATIC ${F2HFILE} ${XF90FILES} ${FTW_F90FILES} )
     set_property( TARGET ${FLIBNAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
     target_include_directories( ${FLIBNAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${FTW_INCLUDES} ${FTW_MODULES} )
     set_target_properties( ${FLIBNAME} PROPERTIES Fortran_MODULE_DIRECTORY ${FTW_MODULES} )
@@ -230,12 +235,16 @@ function( F90TWTEST NAME )
     target_compile_options( ${FLIBNAME} PRIVATE "-ffree-line-length-none" )
     endif()
     target_link_libraries( ${FLIBNAME} PUBLIC ${FTW_LIBRARIES} )
+    if ( NOT "${FTW_F2HFILES}" STREQUAL "" )
+        add_dependencies( ${FLIBNAME} ${F2HTRGNAME} )
+    endif()
 
     # compile c and create the executable
     add_executable( ${NAME} ${FTW_CFILES} ${F2HFILE} )
     target_include_directories( ${NAME} PRIVATE ${FPPINCLDS} ${CMAKE_CURRENT_BINARY_DIR} ${FTW_INCLUDES} )
     target_link_libraries( ${NAME} ${FLIBNAME} ${FTW_LIBRARIES})
     target_compile_definitions( ${NAME} PUBLIC ${FTW_DEFINITIONS} )
+    add_dependencies( ${NAME} ${FLIBNAME} )
 
 endfunction()
 
@@ -297,6 +306,7 @@ if ( USEBOOST )
     set_property ( TARGET f90tw_boost PROPERTY POSITION_INDEPENDENT_CODE ON)
     target_include_directories( f90tw_boost PUBLIC ${Boost_INCLUDE_DIRS} )
     target_link_libraries( f90tw_boost PUBLIC f90twi_boost ${Boost_LIBRARIES} )
+    target_compile_definitions( f90tw_boost PUBLIC f90tw_boost USEBOOST)
 
     set ( file1fpp "${CMAKE_CURRENT_SOURCE_DIR}/assertions_boost.fpp" )
     set ( file1 "${CMAKE_CURRENT_BINARY_DIR}/assertions_boost.f90" )
@@ -309,8 +319,10 @@ if ( USEBOOST )
         EXE ${FPP_EXE}
         OPTIONS ${FPP_OPTIONS}
         SWITCH ${FPP_SWITCH}
+        DEFINITIONS USEBOOST
     )
     add_dependencies( f90tw_boost f90twi_boost )
+
 endif()
 
 if ( USEGTEST )
@@ -335,6 +347,7 @@ if ( USEGTEST )
         DEFINITIONS USEGTEST
     )
     add_dependencies( f90tw_gtest f90twi_gtest )
+
 endif()
 
 # make available the include and modulee paths
