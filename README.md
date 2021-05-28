@@ -2,10 +2,6 @@
 
 f90tw project provides fortran wrappers for a limitted subset of the [boost](https://www.boost.org/) and [google](https://github.com/google/googletest) test frameworks functionality. At the same time, offers a rather simple mechanism for setting up and managing test suites in fortran projects. All the way down, f90tw implementation follows a preprocessor-based approach. The motivation was to utilize already available test frameworks and assertions implementation with minimal effort.
 
-## Status
-
-The project is under development and further testing is needed.
-
 ## Build
 
 You will need to obtain the repository from github and follow the usual cmake build steps. It is assumed that a) c/c++ and fortran compilers are available and, b) you have installed boost and gtest packages. In short, [clone](https://github.com/git-guides/git-clone) the project from github, enter the project's directory and issue the usual [cmake](https://cmake.org/documentation/) build commands. On linux boxes, the flow of commands looks like:
@@ -32,7 +28,7 @@ A fortran module with the interface of the fortran wrappers and the correspondin
 - Boost: **assertions_boost** module (implementable in [`assertions_boost.fpp`](f90tw/assertions_boost.fpp)), `libf90tw_boost.a` library (implemented in [`boost_assertions.cpp`](f90tw/boost_assertions.cpp)). After a successful build a "readable" code for the module can be found in `<build>/f90tw/assertions_boost.f90`.
 - Gtest: **assertions_gtest** module (implemented in [`assertions_gtest.fpp`](f90tw/assertions_gtest.fpp)), `libf90tw_gtest.a` library (implemented in `gtest_assertions.cpp`). Also in this case, after a successful build a "readable" code for the module will be located in `<build>/f90tw/ftest_boost.f90`.
 
-If you include f90tw in your cmake project, the variables `f90tw_INCLUDE_DIR` (pointing to the heads directory) and `f90tw_MODULE_DIR` (pointing to the modules and libraries directory) are defined to help you access f90tw functionality. You can find hinds of f90tw use with cmake in [`examples/CMakeLists.txt`](examples/CMakeLists.txt).
+If you include f90tw in your cmake project, the variables `f90tw_INCLUDE_DIR` (pointing to the heads directory) and `f90tw_MODULE_DIR` (pointing to the modules and libraries directory) are defined to help you access f90tw functionality. You can find hinds of f90tw use with cmake in [`examples/CMakeLists.txt`](examples/CMakeLists.txt). The variables `FPP_EXE` (preprocessor), `FPP_ID` (preprocessor id), `FPP_OPTIONS` (preprocessor options) and `FPP_SWITCH` (preprocessor options's switch) are also exposed allowing improved flexibility.
 
 To facilitate the setup of simple tests, additional functionality is provided and demonstrated in the accompanying examples found in the [`example`](examples) directory. A detailed walkthrough of the implementation of the examples can be found [here](examples/README.md).
 
@@ -118,3 +114,7 @@ F90_&lt;level&gt;_&lt;operator&gt; |  (STREQ&#124;STRNE&#124;<br>STRCASEEQ&#124;
 In the gtest case, all the assertion methods can be used with a message as the last argument (of type character(KIND=C_CHAR,LEN=*) ) in order to overwrite the default assertion message.
 
 For more details please check the [gtest](https://github.com/google/googletest) documentation.
+
+## Status
+
+The project is under development.

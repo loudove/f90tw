@@ -8,7 +8,7 @@
 //  F90TW_VERSION % 100 is the patch level
 //  F90TW_VERSION / 100 % 1000 is the minor version
 //  F90TW_VERSION / 100000 is the major version */
-#define F90TW_VERSION 000100
+#define F90TW_VERSION 001000
 
 /* utility macros */
 #define TOSTRHLP(x) #x
