@@ -101,7 +101,7 @@ function( F90TWF2H INFILES OUTFILE )
         find_program ( SED_EXE NAMES "sed" REQUIRED)
         add_custom_command(
             OUTPUT ${F2H_OUTFILE}
-            COMMAND ${SED_EXE} '/^[ \\t]*[!cC]\$$[fF]90[tT][wW] /!d \; s/.*[!cC]\$$[fF]90[tT][wW]\\\(.*\\\)$$/\\1/' ${F2H_INFILES}  >>  ${F2H_OUTFILE}
+            COMMAND ${SED_EXE} '/^[ \\t]*[!cC]\$$[fF]90[tT][wW] /!d \; s/.*[!cC]\$$[fF]90[tT][wW]\\\(.*\\\)$$/\\1/' ${F2H_INFILES}  >  ${F2H_OUTFILE}
             DEPENDS ${F2H_INFILES}
             COMMENT "process ${F2H_INFILES}"
         )
