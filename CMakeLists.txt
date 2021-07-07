@@ -17,7 +17,9 @@ endif()
 
 # set find_package policy
 cmake_policy( SET CMP0074 NEW)
-cmake_policy( SET CMP0079 NEW)
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.13.0)
+  cmake_policy( SET CMP0079 NEW)
+endif()
 
 # get the options for building boost (default yes)
 if ( NOT DEFINED BOOSTFWK )
