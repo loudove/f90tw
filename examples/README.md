@@ -1,6 +1,6 @@
 # f90tw example
 
-Let's assume that we want to test the functionality of the example module in [`example.f90`](example.f90) i.e. to make sure the module procedure `method` (implementing the addition of the given arguments), works in the expected and presumably in a correct way.
+Let's assume that we want to test the functionality of the example module in [`example.f90`](./example.f90) i.e. to make sure the module procedure `method` (implementing the addition of the given arguments), works in the expected and presumably in a correct way.
 
 ## Preprocessor macros implementation
 
@@ -8,13 +8,13 @@ A demonstration of how you can use f90tw preprocessor macros is presented, follo
 
 ### Fortran test code
 
-The fortran testing code is located in [`test_example_boost.fpp`](test_example_boost.fpp). The structure of the file is simple. First we include [`f90tw_test.h`](../f90tw/f90tw_test.h) which provides the necessary preprocessor's marco definitions for implementing tests in fortran.
+The fortran testing code is located in [`test_example_boost.fpp`](./test_example_boost.fpp). The structure of the file is simple. First we include [`f90tw_test.h`](../f90tw/f90tw_test.h) which provides the necessary preprocessor's marco definitions for implementing tests in fortran.
 
 ```fortran
 #include "f90tw_test.h"
 ```
 
-Since we want to implement more than one test, it is convenient to use a module since, among other benefits, we can easily share resources among tests. To do so, we use the [`TESTMODULE`](../README.md#Use) macro:
+Since we want to implement more than one test, it is convenient to use a module since, among other benefits, we can easily share resources among tests. To do so, we use the [`TESTMODULE`](../README.md#use) macro:
 
 ```fortran
 TESTMODULE(test_example, example)
@@ -32,7 +32,7 @@ module test_example      ! module name (first argument of the macro)
 
 The `TESTCONTAINS` macro follows, which expands to the `contain` statement. It was separated from the `TESTMODULE` to leave room for the declaration of module resources common to all the tests implemented in the module.
 
-Now we implement the test(s) in mind with the help of [`TESTCODE`](../README.md#Preprocessor) macro:
+Now we implement the test(s) in mind with the help of [`TESTCODE`](../README.md#preprocessor-macros) macro:
 
 ```fortran
 TESTCODE(BOOST_AUTO_TEST_CASE, DUMMY, test_example1, add_test_method,
@@ -73,15 +73,15 @@ call F90_BOOST_REQUIRE_MESSAGE( check, "some message" /&
 &/ C_NULL_CHAR )
 ```
 
-The rest of the tests (i.e. `test_example2` and `test_example3`) are implemented similarly. In the last one, you can see the use of [`F90SPOT` and `F90SPOTMSG` macros](../README.md#Preprocessor).
+The rest of the tests (i.e. `test_example2` and `test_example3`) are implemented similarly. In the last one, you can see the use of [`F90SPOT` and `F90SPOTMSG` macros](../README.md#preprocessor-macros).
 
-In the test(s) implementation, you should use the [boost assertions wrappers](../README.md#Boost.test) as you see fit in your case.
+In the test(s) implementation, you should use the [boost assertions wrappers](../README.md#boost.test-assertions-tests) as you see fit in your case.
 
-The fortran implementation using the gtest framework is similar. The only differences are that a) in the TESTCODE macro you should provide also the name of the test suite, b) the [gtest assertions wrappers](../README.md#Gtest) should be used, and (**MORE IMPORTANTLY**) c) the preprocessor symbol `USEGTEST` should be defined in the compilation stage.
+The fortran implementation using the gtest framework is similar. The only differences are that a) in the TESTCODE macro you should provide also the name of the test suite, b) the [gtest assertions wrappers](../README.md#gtest) should be used, and (**MORE IMPORTANTLY**) c) the preprocessor symbol `USEGTEST` should be defined in the compilation stage.
 
 ### C/C++ test code
 
-The c/c++ code located in [`test_example_boost.cpp`](test_example_boost.cpp) is even simpler. First we set the fortan file as the `CURRENTTESTFILE`:
+The c/c++ code located in [`test_example_boost.cpp`](./test_example_boost.cpp) is even simpler. First we set the fortran file as the `CURRENTTESTFILE`:
 
 ```c
 #define CURRENTTESTFILE "test_example_boost.fpp"
@@ -93,13 +93,13 @@ end then we include the f90tw header [`f90tw_boost.h`](../f90tw/f90tw_boost.h):
 #include "f90tw_boost.h"
 ```
 
-And that's it! Essentially, the preprocessor will parse the provided fortran file twice (see [`f90tw_boost.h`](../f90tw/f90tw_boost.h)). In the first pass, creates the definitions for the fortran subroutines declared in [`test_example_boost.cpp`](test_example_boost.cpp) and in the second, creates the boost tests that will call their fortran counterparts.
+And that's it! Essentially, the preprocessor will parse the provided fortran file twice (see [`f90tw_boost.h`](../f90tw/f90tw_boost.h)). In the first pass, creates the definitions for the fortran subroutines declared in [`test_example_boost.cpp`](./test_example_boost.cpp) and in the second, creates the boost tests that will call their fortran counterparts.
 
 Again, the implementation using the gtest framework is similar except that a) different f90tw header is used (`f90tw_gtest.h`](../f90tw/f90tw_gtest.h), b)) and (**MORE IMPORTANTLY**) b) the preprocessor symbol `USEGTEST` should be defined in the compilation stage.
 
 ## Directives implementation
 
-The fortran testing code is located in [`test_example_gtest.f90`](test_example_example.f90). It is a standard fortran source file where the !$f90wt directive is utilized to indicate the test methods to be included in a specific test. For example :
+The fortran testing code is located in [`test_example_gtest.f90`](./test_example_gtest.f90). It is a standard fortran source file where the !$f90wt directive is utilized to indicate the test methods to be included in a specific test. For example :
 
 ```fortran
    !$f90tw TESTCODE(TEST, test_gtest, test_example1, add_test_method,
@@ -111,11 +111,11 @@ The fortran testing code is located in [`test_example_gtest.f90`](test_example_e
 
 the `add_test_method` will be wrapped in the `test_example1` test of the `test_gtest` test suite.
 
-Essensially, the directive lines will be processed and included in the c/c++ pair file in order to create the tests using exactly the same logic (and preprocessor macros) described in the preprocessor based implementation.
+Essentially, the directive lines will be processed and included in the c/c++ pair file in order to create the tests using exactly the same logic (and preprocessor macros) described in the preprocessor based implementation.
 
 ### C/C++ test code
 
-The c/c++ code located in [`test_example_gtest.cpp`](test_example_gtest.cpp) is almost identical to the one described in the preprocessor based implementation. The only difference is that the `CURRENTTESTFILE` is set to `test_example_gtest.f90.h`. The name of the header is the name of the fortran file with the header extension `.h` appended, and it is created automaticaly by processing the fortran counterpart (see `F90TWTEST` cmake function implemented in [f90wt/CMakeLists.txt](../f90wt/CMakeLists.txt)).
+The c/c++ code located in [`test_example_gtest.cpp`](./test_example_gtest.cpp) is almost identical to the one described in the preprocessor based implementation. The only difference is that the `CURRENTTESTFILE` is set to `test_example_gtest.f90.h`. The name of the header is the name of the fortran file with the header extension `.h` appended, and it is created automatically by processing the fortran counterpart (see `F90TWTEST` cmake function implemented in [f90wt/CMakeLists.txt](../f90wt/CMakeLists.txt)).
 
 Then we include the f90tw header [`f90tw_gtest.h`](../f90tw/f90tw_gtest.h):
 
