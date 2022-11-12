@@ -7,7 +7,7 @@ VERSIONSUB
 
 /* For each supported boost assertion, a wrapper is created for
 // the various levels (see boost_level.h) and arguments type (see
-// <implement|interfae>_boost_wrapers.h) supported. The latter is
+// <implement|interface>_boost_wrapers.h) supported. The latter is
 // controlled with HAVECINT, HAVECBOOL, HAVECFLOAT and HAVECDOUBLE
 // definitions corresponding to integer(kind=C_INT), logical(kind=C_BOOL),
 // real(kind=C_FLOAT) and real(kind=C_DOUBLE) types. The BOOSTFUNCTION
